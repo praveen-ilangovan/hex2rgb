@@ -59,7 +59,7 @@ function hex2rgb(hexValue) {
 	for (const i of hex)
 		rgb.push(hex2dec(i));
 
-	return rgb
+	return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
 }
 
 
@@ -91,17 +91,61 @@ const HEX_VALUES = {
 	"f" : 15
 };
 
-const value = "#f00f00";
-setBGColor("purple");
+// *************************************************************************************
+// 
+// Events
+// 
+// *************************************************************************************
 
-// Testing hex to dec
-const hexs = ["3e8", "635", "f", "22", "5B77"];
-for (const i of hexs) {
-	console.log(i, " - ", hex2dec(i));
+function convert(inputField, outputField) {
+	let color;
+	let value = "";
+
+	try {
+		color = hex2rgb(inputField.value);
+		value = color;
+	}
+	catch(err) {
+		color = defaultBGColor;
+	}
+
+	// Set the bg color;
+	setBGColor(color);
+	// Set the output field;
+	outputField.value = value;
 }
 
-// Testing hex to rgb
-const colors = ["fff", "#fff", "ff0022", "#ff0022"];
-for (const i of colors) {
-	console.log(i, " - ", hex2rgb(i));
+
+function inputDetected(e) {
+	const outputField = e.target === inputOneField ? inputTwoField : inputOneField;
+	convert(e.target, outputField);
 }
+
+// *************************************************************************************
+// 
+// Get the elements by Id and store them in variables.
+// 
+// *************************************************************************************
+
+const defaultBGColor = "#ffd454";
+
+const inputOneField = document.getElementById("inputOne");
+const inputTwoField = document.getElementById("inputTwo");
+
+// *************************************************************************************
+// 
+// Register Event handlers
+// 
+// *************************************************************************************
+
+inputOneField.addEventListener("input", inputDetected);
+inputTwoField.addEventListener("input", inputDetected);
+
+
+// *************************************************************************************
+// 
+// Initializers
+// 
+// *************************************************************************************
+
+setBGColor(defaultBGColor);
