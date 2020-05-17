@@ -162,6 +162,34 @@ function dec2hex(decValue) {
 	return hex;
 }
 
+/**
+ * Converts RGB code to Hex color
+ * 
+ * @param {String} rgbValue
+ *
+ * Returns a hex color code.
+ */
+function rgb2hex(rgbValue) {
+	let hex = "";
+
+	if (!rgbValue.startsWith("rgb(") || !rgbValue.endsWith(")"))
+		throw new Error("Invalid RGB value");
+
+	let values = rgbValue.slice(4, rgbValue.length-1).split(",");
+	if (values.length !== 3)
+		throw new Error("RGB needs three values.");
+
+	for (let value of values) {
+		value = parseInt(value);
+		if (value < 0 || value > 255)
+			throw new Error("RGB value should be between 0-255");
+
+		hex += dec2hex(value);
+	}
+
+	return "#" + hex;
+}
+
 
 // *************************************************************************************
 // 
@@ -229,4 +257,13 @@ setBGColor(defaultBGColor);
 // *************************************************************************************
 
 for (let i of [35632, 7562])
-	console.log(i, dec2hex(35631));
+	console.log(i, dec2hex(35631)); 
+
+for (let i of ["#fff", "rgb(1,1,1", "r(1,1,1)", "rgb(255,134,112)", "rgb(345,1)", "rgb(345)", "rgb(255,134,439)"]) {
+	try{	
+		console.log(rgb2hex(i));
+	}
+	catch(err){
+		console.log(err);
+	}
+}
