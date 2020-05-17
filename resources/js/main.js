@@ -1,4 +1,67 @@
 
+// *************************************************************************************
+// 
+// Conversion Tables
+// 
+// *************************************************************************************
+
+/**
+ * Valid hex values
+ */
+const HEX_2_DEC_MAP = {
+	"0" : 0,
+	"1" : 1,
+	"2" : 2,
+	"3" : 3,
+	"4" : 4,
+	"5" : 5,
+	"6" : 6,
+	"7" : 7,
+	"8" : 8,
+	"9" : 9,
+	"A" : 10,
+	"B" : 11,
+	"C" : 12,
+	"D" : 13,
+	"E" : 14,
+	"F" : 15,
+	"a" : 10,
+	"b" : 11,
+	"c" : 12,
+	"d" : 13,
+	"e" : 14,
+	"f" : 15
+};
+
+/**
+ * Valid dec values
+ */
+const DEC_2_HEX_MAP = {
+	0 : "0",
+	1 : "1",
+	2 : "2",
+	3 : "3",
+	4 : "4",
+	5 : "5",
+	6 : "6",
+	7 : "7",
+	8 : "8",
+	9 : "9",
+	10 : "A",
+	11 : "B",
+	12 : "C",
+	13 : "D",
+	14 : "E",
+	15 : "F"
+};
+
+// *************************************************************************************
+// 
+// Functions
+// 
+// *************************************************************************************
+
+
 /**
  * Set the background color of the body
  *
@@ -7,6 +70,13 @@
 function setBGColor(color) {
 	document.body.style.backgroundColor = color;
 }
+
+
+// *************************************************************************************
+// 
+// Hex to RGB
+// 
+// *************************************************************************************
 
 /**
  * Convert Hexadecimal to decimal
@@ -19,11 +89,11 @@ function hex2dec(hexValue) {
 	let dec = 0;
 
 	for (let i = 0; i < hexValue.length; i++){
-		if (!HEX_VALUES.hasOwnProperty(hexValue[i])) {
+		if (!HEX_2_DEC_MAP.hasOwnProperty(hexValue[i])) {
 			throw new Error("Invalid Hex character");
 		}
 
-		dec += (HEX_VALUES[hexValue[i]] * Math.pow(16, hexValue.length-i-1));
+		dec += (HEX_2_DEC_MAP[hexValue[i]] * Math.pow(16, hexValue.length-i-1));
 	}
 
 	return dec;
@@ -63,33 +133,35 @@ function hex2rgb(hexValue) {
 }
 
 
+// *************************************************************************************
+// 
+// RGB to Hex
+// 
+// *************************************************************************************
+
 /**
- * Valid hex values
+ * Convert Decimal to Hexadecimal
+ *
+ * @param {int} decValue
+ *
+ * Returns the Hexadecimal value.Throws an error if its an invalid value.
  */
-const HEX_VALUES = {
-	"0" : 0,
-	"1" : 1,
-	"2" : 2,
-	"3" : 3,
-	"4" : 4,
-	"5" : 5,
-	"6" : 6,
-	"7" : 7,
-	"8" : 8,
-	"9" : 9,
-	"A" : 10,
-	"B" : 11,
-	"C" : 12,
-	"D" : 13,
-	"E" : 14,
-	"F" : 15,
-	"a" : 10,
-	"b" : 11,
-	"c" : 12,
-	"d" : 13,
-	"e" : 14,
-	"f" : 15
-};
+function dec2hex(decValue) {
+	let hex = "";
+	let value = decValue;
+	let quotient;
+
+	while (true) {
+		quotient = Math.floor(value / 16);
+		hex = DEC_2_HEX_MAP[(value % 16).toString()] + hex;
+		if (quotient === 0)
+			break
+		value = quotient;
+	}
+
+	return hex;
+}
+
 
 // *************************************************************************************
 // 
@@ -149,3 +221,12 @@ inputTwoField.addEventListener("input", inputDetected);
 // *************************************************************************************
 
 setBGColor(defaultBGColor);
+
+// *************************************************************************************
+// 
+// Test
+// 
+// *************************************************************************************
+
+for (let i of [35632, 7562])
+	console.log(i, dec2hex(35631));
