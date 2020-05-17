@@ -184,7 +184,7 @@ function rgb2hex(rgbValue) {
 		if (value < 0 || value > 255)
 			throw new Error("RGB value should be between 0-255");
 
-		hex += dec2hex(value);
+		hex += dec2hex(value).padStart(2, "0");
 	}
 
 	return "#" + hex;
@@ -201,8 +201,12 @@ function convert(inputField, outputField) {
 	let color;
 	let value = "";
 
+	// Find the right method to call.
+	// If the value starts with rgb(, call rgb2hex converter
+	let funcToCall = inputField.value.startsWith("rgb(") ? rgb2hex : hex2rgb
+
 	try {
-		color = hex2rgb(inputField.value);
+		color = funcToCall(inputField.value);
 		value = color;
 	}
 	catch(err) {
@@ -249,21 +253,3 @@ inputTwoField.addEventListener("input", inputDetected);
 // *************************************************************************************
 
 setBGColor(defaultBGColor);
-
-// *************************************************************************************
-// 
-// Test
-// 
-// *************************************************************************************
-
-for (let i of [35632, 7562])
-	console.log(i, dec2hex(35631)); 
-
-for (let i of ["#fff", "rgb(1,1,1", "r(1,1,1)", "rgb(255,134,112)", "rgb(345,1)", "rgb(345)", "rgb(255,134,439)"]) {
-	try{	
-		console.log(rgb2hex(i));
-	}
-	catch(err){
-		console.log(err);
-	}
-}
