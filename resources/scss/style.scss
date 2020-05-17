@@ -1,6 +1,28 @@
+
+// Config import
+@import 'config';
+
+// Settings per container 
+@import 'navbar';
+@import 'form';
+
 // Set margin and padding to zero
 * {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
 }
+
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+// Common style to the whole page
+.main-container {
+	color: $font-color;
+	font-family: $font-family;
+	font-weight: 200;
+	font-size: 20px;
+}
+
