@@ -71,6 +71,15 @@ function setBGColor(color) {
 	document.body.style.backgroundColor = color;
 }
 
+/**
+ * Set the title color
+ *
+ * @param {String} brghtness
+ */
+function setTitleColor(brightness=1) {
+	pageTitle.style.color = brightness > 0.5 ? titleColor : "white";
+}
+
 
 // *************************************************************************************
 // 
@@ -129,7 +138,8 @@ function hex2rgb(hexValue) {
 	for (const i of hex)
 		rgb.push(hex2dec(i));
 
-	return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+	return {"color" : `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,
+			"brightness" : getBrightness(rgb)};
 }
 
 
@@ -163,14 +173,14 @@ function dec2hex(decValue) {
 }
 
 /**
- * Converts RGB code to Hex color
+ * Converts RGB string to RGB int
  * 
  * @param {String} rgbValue
  *
- * Returns a hex color code.
+ * Returns an array of three ints
  */
-function rgb2hex(rgbValue) {
-	let hex = "";
+function rgbStrToInt(rgbValue) {
+	let rgbArray = [];
 
 	if (!rgbValue.startsWith("rgb(") || !rgbValue.endsWith(")"))
 		throw new Error("Invalid RGB value");
@@ -184,10 +194,48 @@ function rgb2hex(rgbValue) {
 		if (value < 0 || value > 255)
 			throw new Error("RGB value should be between 0-255");
 
+		rgbArray.push(value);
+	}
+
+	return rgbArray;
+}
+
+/**
+ * Converts RGB code to Hex color
+ * 
+ * @param {String} rgbValue
+ *
+ * Returns a hex color code.
+ */
+function rgb2hex(rgbValue) {
+	let hex = "";
+	let rgb = rgbStrToInt(rgbValue);
+
+	for (let value of rgb) {
 		hex += dec2hex(value).padStart(2, "0");
 	}
 
-	return "#" + hex;
+	return {"color" : "#" + hex,
+			"brightness" : getBrightness(rgb)};
+}
+
+// *************************************************************************************
+// 
+// Calculate the brightness of a color
+// 
+// *************************************************************************************
+
+function getBrightness(rgb) {
+	let rgbF = [];
+
+	for (let value of rgb) {
+		rgbF.push(value/255);
+	}
+
+	const cmax = Math.max(rgbF[0], rgbF[1], rgbF[2]);
+	const cmin = Math.min(rgbF[0], rgbF[1], rgbF[2]);
+
+	return (cmax+cmin)/2;
 }
 
 
@@ -199,6 +247,7 @@ function rgb2hex(rgbValue) {
 
 function convert(inputField, outputField) {
 	let color;
+	let brightness = 1;
 	let value = "";
 
 	// Find the right method to call.
@@ -206,7 +255,10 @@ function convert(inputField, outputField) {
 	let funcToCall = inputField.value.startsWith("rgb(") ? rgb2hex : hex2rgb
 
 	try {
-		color = funcToCall(inputField.value);
+		let result = funcToCall(inputField.value);
+
+		color = result.color;
+		brightness = result.brightness;
 		value = color;
 	}
 	catch(err) {
@@ -215,6 +267,8 @@ function convert(inputField, outputField) {
 
 	// Set the bg color;
 	setBGColor(color);
+	// Set the brightness;
+	setTitleColor(brightness);
 	// Set the output field;
 	outputField.value = value;
 }
@@ -231,8 +285,10 @@ function inputDetected(e) {
 // 
 // *************************************************************************************
 
+const titleColor = "#222222";
 const defaultBGColor = "#ffd454";
 
+const pageTitle = document.getElementById("pageTitle");
 const inputOneField = document.getElementById("inputOne");
 const inputTwoField = document.getElementById("inputTwo");
 
@@ -253,3 +309,4 @@ inputTwoField.addEventListener("input", inputDetected);
 // *************************************************************************************
 
 setBGColor(defaultBGColor);
+setTitleColor();
