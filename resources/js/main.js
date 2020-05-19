@@ -76,8 +76,8 @@ function setBGColor(color) {
  *
  * @param {String} brghtness
  */
-function setTitleColor(brightness=1) {
-	pageTitle.style.color = brightness > 0.5 ? titleColor : "white";
+function setColor(brightness=1) {
+	document.body.className = brightness > 0.5 ? "dark" : "light";
 }
 
 
@@ -268,7 +268,7 @@ function convert(inputField, outputField) {
 	// Set the bg color;
 	setBGColor(color);
 	// Set the brightness;
-	setTitleColor(brightness);
+	setColor(brightness);
 	// Set the output field;
 	outputField.value = value;
 }
@@ -309,4 +309,4 @@ inputTwoField.addEventListener("input", inputDetected);
 // *************************************************************************************
 
 setBGColor(defaultBGColor);
-setTitleColor();
+setColor();

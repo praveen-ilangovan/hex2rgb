@@ -3,11 +3,13 @@
 	box-shadow: none;
 }
 
-// Title
+// Title: inherit the parent color
 .title {
-	color: $font-color;
+	color: inherit;
+	font-size: $title-font-size;
+	letter-spacing: 1px;
 }
 
 .title:hover {
-	color: $font-color;
+	color: inherit;
 }
