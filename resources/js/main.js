@@ -55,6 +55,50 @@ const DEC_2_HEX_MAP = {
 	15 : "F"
 };
 
+/**
+ * Convert Decimal to Hexadecimal
+ *
+ * @param {int} decValue
+ *
+ * Returns the Hexadecimal value. Throws an error if its an invalid value.
+ */
+function dec2hex(decValue) {
+	let hex = "";
+	let value = decValue;
+	let quotient;
+
+	while (true) {
+		quotient = Math.floor(value / 16);
+		hex = DEC_2_HEX_MAP[(value % 16).toString()] + hex;
+		if (quotient === 0)
+			break
+		value = quotient;
+	}
+
+	return hex;
+}
+
+/**
+ * Convert Hexadecimal to decimal
+ *
+ * @param {String} hexValue
+ *
+ * Returns the decimal value. Throws an error if its an invalid hex value.
+ */
+function hex2dec(hexValue) {
+	let dec = 0;
+
+	for (let i = 0; i < hexValue.length; i++){
+		if (!HEX_2_DEC_MAP.hasOwnProperty(hexValue[i])) {
+			throw new Error(hexValue[i] + " is not a valid Hex character.");
+		}
+
+		dec += (HEX_2_DEC_MAP[hexValue[i]] * Math.pow(16, hexValue.length-i-1));
+	}
+
+	return dec;
+}
+
 // *************************************************************************************
 // 
 // Functions
@@ -81,163 +125,183 @@ function setColor(brightness=1) {
 }
 
 
+
 // *************************************************************************************
 // 
-// Hex to RGB
+// Color converter
 // 
 // *************************************************************************************
 
 /**
- * Convert Hexadecimal to decimal
+ * Color converter
  *
- * @param {String} hexValue
+ * Accepts RGB color: format {String} => rgb(255, 255, 255);
+ * Accepts Hex code: format {String} ==> #fff, fff, #ffffff, ffffff, FFF
  *
- * Returns the decimal value.Throws an error if its an invalid hex value.
+ * Converts the RGB to Hex and Hex to RGB
+ * Calculates the brightness of the color
+ *
+ * USAGE:
+ *
+ * const color = "#fff" or "rgb(255,255,255)";
+ * const colObject = new ColorConverter(color);
+ * colObject.convert();
+ * colObject.rgb returns the color in rgb() format
+ * colObject.hex returns the color as hexcode
+ * colObject.brightness returns the color's brightness in 0 to 1 scale.
  */
-function hex2dec(hexValue) {
-	let dec = 0;
 
-	for (let i = 0; i < hexValue.length; i++){
-		if (!HEX_2_DEC_MAP.hasOwnProperty(hexValue[i])) {
-			throw new Error("Invalid Hex character");
+class ColorConverter {
+
+	static RGB_REGEX = /^rgb\([0-9]{1,3},[0-9]{1,3},[0-9]{1,3}\)$/g;
+	static HEX_REGEX = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}){1}$/g;
+	static TYPE_RGB = "rgb";
+	static TYPE_HEX = "hex";
+
+	constructor(color) {
+		this.rgb;
+		this.hex;
+		this.rgbArray;
+		this.brightness;
+		this.inputType;
+		this.output;
+
+		this.validateColor(color);	
+	}
+
+	/**
+	 * Convert color mode and calculate brightness
+	 */
+	convert() {
+		if (this.inputType === ColorConverter.TYPE_RGB)
+			this.convertRGBToHex();
+		else
+			this.convertHexToRGB();
+		this.calculateBrightness();
+	}
+
+	/**
+	 * Convert RGB to Hex.
+	 */
+	convertRGBToHex() {
+		let tempHex = "";
+
+		for (let value of this.rgbArray) {
+			tempHex += dec2hex(value).padStart(2, "0");
 		}
 
-		dec += (HEX_2_DEC_MAP[hexValue[i]] * Math.pow(16, hexValue.length-i-1));
+		this.hex = "#" + tempHex;
+		this.output = this.hex;
 	}
 
-	return dec;
+	/**
+	 * Convert Hex to RGB.
+	 */
+	convertHexToRGB() {
+		let tempRGB = [];
+
+		for (let i = 1; i < 7; i+=2) {
+			tempRGB.push(hex2dec( this.hex.slice(i, i+2) ));
+		}
+
+		this.rgbArray = tempRGB;
+		this.rgb = this.getRGBString();
+		this.output = this.rgb;
+	}
+
+	/**
+	 * Calculate the brightness of the color.
+	 */
+	calculateBrightness() {
+		let rgbF = [];
+
+		for (let value of this.rgbArray) {
+			rgbF.push(value/255);
+		}
+
+		const cmax = Math.max(rgbF[0], rgbF[1], rgbF[2]);
+		const cmin = Math.min(rgbF[0], rgbF[1], rgbF[2]);
+
+		this.brightness = (cmax+cmin)/2;
+	}
+
+	/**
+	 * Validate the color.
+	 *
+	 * Validates if the color is a legal rgb value or a hex code
+	 */
+	validateColor(color) {
+		let validated;
+
+		validated = this.validateRGBColor(color);
+		if (validated) {
+			this.rgbArray = validated;
+			this.rgb = this.getRGBString();
+			this.inputType = ColorConverter.TYPE_RGB;
+			return;
+		}
+
+		validated = this.validateHexColor(color);
+		if (validated) {
+			this.hex = validated;
+			this.inputType = ColorConverter.TYPE_HEX;
+			return;
+		}
+
+		throw new Error("Please provide a valid RGB or a hex color code");
+	}
+
+	/**
+	 * Validate the color.
+	 *
+	 * Validates if the color is a legal rgb value or a hex code
+	 */
+	validateRGBColor(color) {
+		if (!color.match(ColorConverter.RGB_REGEX))
+			return
+
+		let rgbArray = [];
+
+		let values = color.slice(4, color.length-1).split(",");
+		for (let value of values) {
+			value = parseInt(value);
+			if (value < 0 || value > 255)
+				throw new Error("RGB value should be between 0-255");
+
+			rgbArray.push(value);
+		}
+
+		return rgbArray;
+	}
+
+	/**
+	 * Validate the color.
+	 *
+	 * Validates if the color is a legal rgb value or a hex code
+	 */
+	validateHexColor(color) {
+		if (!color.match(ColorConverter.HEX_REGEX))
+			return
+
+		let hexCode = color;
+		if (hexCode.length == 3 || hexCode.length == 6)
+			hexCode = "#" + hexCode;
+
+		if (hexCode.length == 4)
+			hexCode = hexCode + hexCode.slice(1,4);
+
+		return hexCode;
+	}
+
+	/**
+	 * Format RGB array as a valid RGB string
+	 *
+	 * Validates if the color is a legal rgb value or a hex code
+	 */
+	 getRGBString() {
+	 	return `rgb(${this.rgbArray[0]},${this.rgbArray[1]},${this.rgbArray[2]})`;
+	 }
 }
-
-/**
- * Converts Hex code to RGB color
- * 
- * @param {String} hexValue
- *
- * Returns an array of three values
- */
-function hex2rgb(hexValue) {
-	// Remove the hash if its there
-	const value = hexValue[0] === "#" ? hexValue.slice(1,hexValue.length) : hexValue;
-	let hex = [];
-	let rgb = [];
-
-	// Check if it has the right length
-	if (value.length === 3) {
-		hex.push(value[0] + value[0]);
-		hex.push(value[1] + value[1]);
-		hex.push(value[2] + value[2]);
-	}
-	else if(value.length === 6) {
-		hex.push(value[0] + value[1]);
-		hex.push(value[2] + value[3]);
-		hex.push(value[4] + value[5]);
-	}
-	else
-		throw new Error("Invalid hex length");
-
-	for (const i of hex)
-		rgb.push(hex2dec(i));
-
-	return {"color" : `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,
-			"brightness" : getBrightness(rgb)};
-}
-
-
-// *************************************************************************************
-// 
-// RGB to Hex
-// 
-// *************************************************************************************
-
-/**
- * Convert Decimal to Hexadecimal
- *
- * @param {int} decValue
- *
- * Returns the Hexadecimal value.Throws an error if its an invalid value.
- */
-function dec2hex(decValue) {
-	let hex = "";
-	let value = decValue;
-	let quotient;
-
-	while (true) {
-		quotient = Math.floor(value / 16);
-		hex = DEC_2_HEX_MAP[(value % 16).toString()] + hex;
-		if (quotient === 0)
-			break
-		value = quotient;
-	}
-
-	return hex;
-}
-
-/**
- * Converts RGB string to RGB int
- * 
- * @param {String} rgbValue
- *
- * Returns an array of three ints
- */
-function rgbStrToInt(rgbValue) {
-	let rgbArray = [];
-
-	if (!rgbValue.startsWith("rgb(") || !rgbValue.endsWith(")"))
-		throw new Error("Invalid RGB value");
-
-	let values = rgbValue.slice(4, rgbValue.length-1).split(",");
-	if (values.length !== 3)
-		throw new Error("RGB needs three values.");
-
-	for (let value of values) {
-		value = parseInt(value);
-		if (value < 0 || value > 255)
-			throw new Error("RGB value should be between 0-255");
-
-		rgbArray.push(value);
-	}
-
-	return rgbArray;
-}
-
-/**
- * Converts RGB code to Hex color
- * 
- * @param {String} rgbValue
- *
- * Returns a hex color code.
- */
-function rgb2hex(rgbValue) {
-	let hex = "";
-	let rgb = rgbStrToInt(rgbValue);
-
-	for (let value of rgb) {
-		hex += dec2hex(value).padStart(2, "0");
-	}
-
-	return {"color" : "#" + hex,
-			"brightness" : getBrightness(rgb)};
-}
-
-// *************************************************************************************
-// 
-// Calculate the brightness of a color
-// 
-// *************************************************************************************
-
-function getBrightness(rgb) {
-	let rgbF = [];
-
-	for (let value of rgb) {
-		rgbF.push(value/255);
-	}
-
-	const cmax = Math.max(rgbF[0], rgbF[1], rgbF[2]);
-	const cmin = Math.min(rgbF[0], rgbF[1], rgbF[2]);
-
-	return (cmax+cmin)/2;
-}
-
 
 // *************************************************************************************
 // 
@@ -250,15 +314,12 @@ function convert(inputField, outputField) {
 	let brightness = 1;
 	let value = "";
 
-	// Find the right method to call.
-	// If the value starts with rgb(, call rgb2hex converter
-	let funcToCall = inputField.value.startsWith("rgb(") ? rgb2hex : hex2rgb
-
 	try {
-		let result = funcToCall(inputField.value);
+		const colObject = new ColorConverter(inputField.value);
+		colObject.convert();
 
-		color = result.color;
-		brightness = result.brightness;
+		color = colObject.output;
+		brightness = colObject.brightness;
 		value = color;
 	}
 	catch(err) {
