@@ -9,10 +9,9 @@
 	// Inherti the parent color and font-family
 	font-family: inherit;
 	color: inherit;
-	border-color: inherit;
 
 	border-style: none;
-	border-bottom: 1px dotted;
+	border-bottom: 1px dotted #999;
 
 	font-size: $input-font-size;
 
@@ -23,6 +22,7 @@
 // Remove the border highlight on focus
 .input-field:focus {
 	outline: none;
+	border-bottom: 1px dotted #000;
 }
 
 // Placeholder to inherit the parent 

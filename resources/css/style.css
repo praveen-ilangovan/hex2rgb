@@ -17,15 +17,15 @@
 .input-field {
   font-family: inherit;
   color: inherit;
-  border-color: inherit;
   border-style: none;
-  border-bottom: 1px dotted;
+  border-bottom: 1px dotted #999;
   font-size: 34px;
   padding: 5px 0;
   margin-bottom: 15px; }
 
 .input-field:focus {
-  outline: none; }
+  outline: none;
+  border-bottom: 1px dotted #000; }
 
 ::placeholder {
   color: inherit;
