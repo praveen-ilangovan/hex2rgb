@@ -28,7 +28,7 @@
   border-bottom: 1px dotted #000; }
 
 ::placeholder {
-  color: inherit;
+  color: #777;
   font-family: inherit;
   font-size: 34px; }
 
