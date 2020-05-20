@@ -340,6 +340,17 @@ function inputDetected(e) {
 	convert(e.target, outputField);
 }
 
+function inputClicked(e) {
+	try {
+		const colObject = new ColorConverter(e.target.value);
+		if (colObject.inputType === ColorConverter.TYPE_HEX){
+			e.target.value = colObject.hex;
+		}
+	}
+	catch(err) {
+	}
+}
+
 // *************************************************************************************
 // 
 // Get the elements by Id and store them in variables.
@@ -362,6 +373,8 @@ const inputTwoField = document.getElementById("inputTwo");
 inputOneField.addEventListener("input", inputDetected);
 inputTwoField.addEventListener("input", inputDetected);
 
+inputOneField.addEventListener("click", inputClicked);
+inputTwoField.addEventListener("click", inputClicked);
 
 // *************************************************************************************
 // 
